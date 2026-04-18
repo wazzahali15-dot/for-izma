@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To My Favorite Person, IZMA 💕</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Dancing+Script:wght@700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        /* Game Canvas Overlay */
+        #gameOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(255,182,193,0.9), rgba(230,230,250,0.9));
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #gameCanvas {
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            touch-action: none;
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #FF1493;
+            font-weight: 600;
+            font-size: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .game-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #4B0082;
+        }
+
+        .game-btn {
+            background: rgba(255,20,147,0.8);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255,20,147,0.4);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .game-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255,20,147,0.6);
+        }
+
+        /* Music Toggle */
+        #musicToggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255,182,193,0.8);
+            backdrop-filter: blur(15px);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            color: #FF1493;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255,20,147,0.4);
+            z-index: 100;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #musicToggle:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 15px 40px rgba(255,20,147,0.6);
+        }
+
+        #musicToggle.playing::after {
+            content: '🎵';
+            animation: noteFloat 2s infinite ease-in-out;
+        }
+
+        #musicToggle.muted::after {
+            content: '🔇';
+        }
+
+        @keyframes noteFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #FFB6C1 0%, #E6E6FA 25%, #FFDAB9 50%, #B0E0E6 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            position: relative;
+        }
+
+        /* Floating Hearts Background */
+        .heart {
+            position: fixed;
+            font-size: 20px;
+            color: #FF69B4;
+            pointer-events: none;
+            z-index: 1;
+            animation: float 6s infinite linear;
+        }
+
+        .heart:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .heart:nth-child(2) { top: 20%; right: 10%; animation-delay: 1s; font-size: 15px; }
+        .heart:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 2s; }
+        .heart:nth-child(4) { top: 60%; right: 20%; animation-delay: 3s; font-size: 18px; }
+        .heart:nth-child(5) { bottom: 40%; left: 60%; animation-delay: 4s; }
+        .heart:nth-child(6) { top: 40%; left: 70%; animation-delay: 5s; font-size: 16px; }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Sparkles */
+        .sparkle {
+            position: fixed;
+            color: #FFD700;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1;
+            animation: sparkle 4s infinite ease-in-out;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Sections */
+        section {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding-top: 120px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(3rem, 8vw, 6rem);
+            color: #FF1493;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 8px rgba(255,20,147,0.3);
+        }
+
+        .hero p {
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            color: #4B0082;
+            font-weight: 600;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            background: rgba(255,182,193,0.8);
+            backdrop-filter: blur(10px);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #FF1493;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(255,20,147,0.3);
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(255,20,147,0.5);
+            background: rgba(255,182,193,1);
+        }
+
+        /* Card */
+        .card {
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            animation: fadeInUp 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '💕';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 30px;
+            animation: heartbeat 2s infinite;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .love-letter {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: #4B0082;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .love-letter strong {
+            color: #FF1493;
+            font-family: 'Pacifico', cursive;
+        }
+
+        /* Reasons Grid */
+        .reasons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .reason-card {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .reason-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(255,20,147,0.4);
+            background: rgba(255,255,255,0.4);
+        }
+
+        .reason-card h3 {
+            font-size: 1.5rem;
+            color: #FF1493;
+            margin-bottom: 10px;
+            font-family: 'Pacifico', cursive;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #FF1493;
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #4B0082;
+            margin-top: 10px;
+        }
+
+        /* Surprise Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            position: relative;
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #FF1493;
+        }
+
+        /* Secret Section */
+        #secret {
+            display: none;
+        }
+
+        /* Password Input */
+        #password-section {
+            text-align: center;
+            margin: 60px 0;
+        }
+
+        #password-input {
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            border: 2px solid rgba(255,20,147,0.5);
+            background: rgba(255,255,255,0.8);
+            width: 250px;
+            margin-right: 10px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #4B0082;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            section { padding: 60px 15px; }
+            .hero { padding-top: 80px; }
+            .card { padding: 30px 20px; }
+            .reasons-grid, .stats-grid { grid-template-columns: 1fr; }
+            .modal-content { padding: 40px 30px; margin: 20px; }
+        }
+
+        /* Heart Burst for Modal */
+        .heart-burst {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            pointer-events: none;
+            animation: burst 1s ease-out forwards;
+        }
+
+        @keyframes burst {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(3) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Hearts -->
+    <div class="heart">💕</div>
+    <div class="heart">💖</div>
+    <div class="heart">💗</div>
+    <div class="heart">💘</div>
+    <div class="heart">💝</div>
+    <div class="heart">💞</div>
+
+    <!-- Sparkles -->
+    <div class="sparkle" style="top:15%;left:15%;animation-delay:0s;">✨</div>
+    <div class="sparkle" style="top:25%;right:20%;animation-delay:1s;">⭐</div>
+    <div class="sparkle" style="bottom:30%;left:10%;animation-delay:2s;">🌟</div>
+    <div class="sparkle" style="top:70%;right:15%;animation-delay:3s;">💫</div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <h1>To My Favorite Person, IZMA 💕</h1>
+        <p>Certified Cute. Genuinely Sweet. Permanently Mine.</p>
+        <button class="btn" onclick="scrollToLetter()">Press Me If You Love Me 😌</button>
+    </section>
+
+    <!-- Love Letter Section -->
+    <section id="letter">
+        <div class="card">
+            <div class="love-letter">
+                <p>Dear <strong>IZMA</strong>,</p>
+                <p>You have this way of being effortlessly adorable without even trying.</p>
+                <p>One moment you’re soft and sweet, and the next you’re teasing me like it’s second nature.</p>
+                <p>But honestly? I wouldn’t trade you for anything. Not even unlimited food. (And that says a LOT.)</p>
+                <p>You’ve somehow become my favorite part of the day… the one person who can make everything feel lighter just by being there.</p>
+                <p>Love,<br><strong>Your Babie Wazzah 😌</strong></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reasons Section -->
+    <section>
+        <h2 style="text-align: center; font-family: 'Dancing Script', cursive; font-size: 3rem; color: #FF1493; margin-bottom: 50px;">Reasons Why IZMA Is Elite 🏆</h2>
+        <div class="reasons-grid">
+            <div class="reason-card">
+                <h3>Her smile = illegal levels of cute 😤</h3>
+            </div>
+            <div class="reason-card">
+                <h3>Savage replies in 0.2 seconds 🔥</h3>
+            </div>
+            <div class="reason-card">
+                <h3>Acts innocent but is not innocent.</h3>
+            </div>
+            <div class="reason-card">
+                <h3>Makes my bad days disappear ✨</h3>
+            </div>
+            <div class="reason-card">
+                <h3>Has main character energy 🎬</h3>
+            </div>
+            <div class="reason-card">
+                <h3>Stole my heart and refuses to return it 🚨</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats">
+        <h2 style="text-align: center; font-family: 'Dancing Script', cursive; font-size: 3rem; color: #FF1493; margin-bottom: 50px;">Relationship Stats 💖</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" data-target="Beyond Limits">0</div>
+                <div class="stat-label">❤️ Love Level</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="Soft Chaos 😌">0</div>
+                <div class="stat-label">🔥 Attitude Level</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="Endless">0</div>
+                <div class="stat-label">😂 Laughs Shared</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="0 (happily)">0</div>
+                <div class="stat-label">💬 Arguments Won By Me</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Surprise Button -->
+    <section style="text-align: center;">
+        <button class="btn" style="font-size: 1.5rem; padding: 20px 50px;" onclick="openModal()">Do NOT Click This, IZMA 👀</button>
+    </section>
+
+    <!-- Password Secret -->
+    <section id="password-section">
+        <h2 style="text-align: center; font-family: 'Pacifico', cursive; font-size: 2.5rem; color: #FF1493; margin-bottom: 30px;">Secret page unlock with a password💫</h2>
+        <input type="password" id="password-input" placeholder="Enter password...">
+        <button class="btn" onclick="checkPassword()">Unlock Secret 😏</button>
+    </section>
+
+    <!-- Secret Section -->
+    <section id="secret">
+        <div class="card" style="max-width: 600px;">
+            <h2 style="font-family: 'Dancing Script', cursive; font-size: 3rem; color: #FF1493; text-align: center; margin-bottom: 30px;">IZMA</h2>
+            <p style="font-size: 1.4rem; line-height: 1.8; color: #4B0082; text-align: center;">
+                You made it here 😌.<br><br>
+                Ngl… you’re kinda my favorite person. like, no competition.<br>
+                I love the good parts, the savage parts, the random mood swings… all of it.
+because at the end of the day, it’s just YOU and that’s enough for me. <br>
+You make my life feel lighter without even trying.<br><br>
+                Just remember… I’m always on your side ❤️<br><strong>— Yours, always 💕</strong>
+            </p>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div id="modal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="heart-burst"></div>
+            <h2 style="font-family: 'Dancing Script', cursive; font-size: 2.5rem; color: #FF1493; margin-bottom: 20px;">I just wanted to remind you that you mean the world to me.💕</h2>
+            <p style="font-size: 1.3rem; color: #4B0082; line-height: 1.6; margin-bottom: 30px;">
+                Just wanted to say…<br>
+                <strong>I love you more than Khana.</strong><br>
+                And that’s serious.
+            </p>
+        </div>
+    </div>
+
+        <!-- Music -->
+        <audio id="bgMusic" loop preload="auto" autoplay volume="0.3">
+            <source src="song.mp3" type="audio/mpeg">
+            Your browser does not support the audio element. Add song.mp3 for music 💕
+        </audio>
+
+        <!-- Big Play Song Button (Hero Area) -->
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 50;">
+            <button id="bigPlayBtn" class="btn" style="padding: 12px 24px; font-size: 1.1rem; box-shadow: 0 8px 25px rgba(255,20,147,0.4); background: linear-gradient(45deg, #FF69B4, #FFB6C1);">▶️ Play Song</button>
+        </div>
+
+        <!-- Music Toggle -->
+        <button id="musicToggle" title="Toggle Music"></button>
+
+        <!-- Game Overlay -->
+        <div id="gameOverlay">
+            <div class="game-ui">
+                <div>Score: <span id="gameScore">0</span></div>
+                <div>Lives: <span id="gameLives">3</span> ❤️</div>
+                <div>Time: <span id="gameTime">30</span>s</div>
+            </div>
+            <canvas id="gameCanvas"></canvas>
+            <div class="game-center" id="gameStartScreen">
+                <h2 style="font-family: 'Dancing Script', cursive; font-size: 3rem; color: #FF1493; margin-bottom: 20px;">Catch the Hearts for IZMA 🎮💕</h2>
+                <p style="font-size: 1.3rem; color: #4B0082; margin-bottom: 30px;">Click/tap falling hearts! 30s, 3 lives. Don't miss!</p>
+                <button class="game-btn" onclick="startGame()">Play Game 😌</button>
+            </div>
+            <div class="game-center" id="gameEndScreen" style="display: none;">
+                <h2 id="gameResultTitle" style="font-family: 'Dancing Script', cursive; font-size: 3rem; color: #FF1493;"></h2>
+                <p id="gameResultText" style="font-size: 1.3rem; color: #4B0082; margin: 20px 0;"></p>
+                <button class="game-btn" onclick="startGame()">Play Again 💖</button>
+            </div>
+        </div>
+
+        <!-- Game Section Button -->
+        <section id="gameSection" style="text-align: center; padding: 60px 20px;">
+            <h2 style="font-family: 'Dancing Script', cursive; font-size: 3rem; color: #FF1493; margin-bottom: 30px;">Catch Hearts for IZMA 🎮</h2>
+            <button class="btn" style="font-size: 1.4rem; padding: 20px 50px;" onclick="showGame()">Play Mini Game 😏</button>
+            <p style="margin-top: 20px; color: #4B0082; font-style: italic;">Click/tap falling hearts! Don't let them hit bottom 💕</p>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            Made with ❤️ by the luckiest person alive.
+        </footer>
+
+    <script>
+        // Smooth scroll to letter
+        function scrollToLetter() {
+            document.getElementById('letter').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Modal functions
+        function openModal() {
+            createHeartBurst();
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function closeModal(event) {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Heart burst
+        function createHeartBurst() {
+            const burst = document.getElementById('heart-burst');
+            burst.innerHTML = '';
+            const hearts = ['💕', '💖', '💗', '💘', '💝', '💞'];
+            for (let i = 0; i < 12; i++) {
+                const heart = document.createElement('div');
+                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                heart.style.cssText = `
+                    position: absolute;
+                    font-size: ${15 + Math.random() * 20}px;
+                    animation: burst 1s ease-out forwards ${Math.random() * 0.5}s;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                `;
+                burst.appendChild(heart);
+            }
+            setTimeout(() => { burst.innerHTML = ''; }, 1500);
+        }
+
+        // Stats Counter
+        function animateCounters() {
+            const numbers = document.querySelectorAll('.stat-number');
+            numbers.forEach(num => {
+                const target = num.dataset.target;
+                const count = +target || target;
+                const increment = count / 100;
+                let current = 0;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current < count) {
+                        num.textContent = Math.floor(current) + (typeof count === 'string' ? '%' : '%');
+                    } else {
+                        num.textContent = typeof count === 'string' ? count : count + '%';
+                        clearInterval(timer);
+                    }
+                }, 20);
+            });
+        }
+
+        // Trigger counters on scroll into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        observer.observe(document.getElementById('stats'));
+
+        // Password
+        function checkPassword() {
+            const input = document.getElementById('password-input').value.toLowerCase().trim();
+            if (input === 'izmorae') {
+                document.getElementById('secret').style.display = 'block';
+                document.getElementById('password-section').style.display = 'none';
+                document.getElementById('secret').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('Wrong password! Try again 😏');
+                document.getElementById('password-input').value = '';
+            }
+        }
+
+        // Continuous sparkles
+        function createSparkle() {
+            const sparkle = document.createElement('div');
+            sparkle.textContent = ['✨', '⭐', '🌟', '💫'][Math.floor(Math.random() * 4)];
+            sparkle.className = 'sparkle';
+            sparkle.style.left = Math.random() * 100 + '%';
+            sparkle.style.top = Math.random() * 100 + '%';
+            sparkle.style.animationDuration = (3 + Math.random() * 2) + 's';
+            document.body.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 5000);
+        }
+
+        setInterval(createSparkle, 2000);
+
+        // Music Control
+        const music = document.getElementById('bgMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        const bigPlayBtn = document.getElementById('bigPlayBtn');
+        let musicPlaying = false;
+        let userInteracted = false;
+
+        // Auto-play on load (attempt)
+        music.play().catch(e => {
+            console.log('Autoplay blocked, click to play');
+        });
+        musicPlaying = true;
+        musicToggle.classList.add('playing');
+        bigPlayBtn.textContent = '⏸️ Pause Song';
+        bigPlayBtn.style.background = 'linear-gradient(45deg, #4B0082, #9370DB)';
+
+        function toggleMusic() {
+            userInteracted = true;
+            if (musicPlaying) {
+                music.pause();
+                musicToggle.classList.remove('playing');
+                musicToggle.classList.add('muted');
+                bigPlayBtn.textContent = '▶️ Play Song';
+                bigPlayBtn.style.background = 'linear-gradient(45deg, #FF69B4, #FFB6C1)';
+                musicPlaying = false;
+            } else {
+                music.play().catch(e => console.log('Play error:', e));
+                musicToggle.classList.remove('muted');
+                musicToggle.classList.add('playing');
+                bigPlayBtn.textContent = '⏸️ Pause Song';
+                bigPlayBtn.style.background = 'linear-gradient(45deg, #4B0082, #9370DB)';
+                musicPlaying = true;
+            }
+        }
+
+        musicToggle.addEventListener('click', toggleMusic);
+        bigPlayBtn.addEventListener('click', toggleMusic);
+
+        // First interaction attempt play
+        document.addEventListener('click', () => {
+            if (!userInteracted && !musicPlaying) {
+                toggleMusic();
+            }
+        }, { once: true });
+
+        // Game Variables
+        let gameCanvas, ctx, gameRunning = false, gameTimer = 30, score = 0, lives = 3, gameSpeed = 2;
+        let hearts = [], animationId;
+        const HEART_SIZE = 30;
+
+        function showGame() {
+            document.getElementById('gameOverlay').style.display = 'flex';
+        }
+
+        function startGame() {
+            gameRunning = true;
+            score = 0;
+            lives = 3;
+            gameTimer = 30;
+            gameSpeed = 2;
+            hearts = [];
+            document.getElementById('gameStartScreen').style.display = 'none';
+            document.getElementById('gameEndScreen').style.display = 'none';
+            updateGameUI();
+            gameLoop();
+            gameInterval = setInterval(gameUpdate, 1000);
+        }
+
+        function endGame(win) {
+            gameRunning = false;
+            clearInterval(gameInterval);
+            cancelAnimationFrame(animationId);
+            const finalScore = score;
+            let title, text;
+            if (win || finalScore > 20) {
+                title = 'IZMA Wins! 💕😌';
+                text = `IZMA caught ${finalScore} hearts! You're as good at catching hearts as you are at stealing mine 💕`;
+            } else {
+                title = 'Game Over 😤';
+                text = `Caught ${finalScore} hearts. Even failing looks cute on you IZMA 💖`;
+            }
+            document.getElementById('gameResultTitle').textContent = title;
+            document.getElementById('gameResultText').textContent = text;
+            document.getElementById('gameEndScreen').style.display = 'block';
+            updateGameUI();
+        }
+
+        function gameUpdate() {
+            if (!gameRunning) return;
+            gameTimer--;
+            updateGameUI();
+            if (gameTimer <= 0) {
+                endGame(true);
+            }
+            if (gameTimer % 10 === 0) gameSpeed += 0.5; // Increase difficulty
+        }
+
+        function spawnHeart() {
+            if (!gameRunning) return;
+            hearts.push({
+                x: Math.random() * (gameCanvas.width - HEART_SIZE),
+                y: -HEART_SIZE,
+                size: 20 + Math.random() * 20,
+                speed: gameSpeed + Math.random() * 2,
+                rot: 0,
+                rotSpeed: (Math.random() - 0.5) * 0.1
+            });
+        }
+
+        function updateHearts() {
+            for (let i = hearts.length - 1; i >= 0; i--) {
+                const heart = hearts[i];
+                heart.y += heart.speed;
+                heart.rot += heart.rotSpeed;
+                if (heart.y > gameCanvas.height) {
+                    hearts.splice(i, 1);
+                    lives--;
+                    updateGameUI();
+                    if (lives <= 0) endGame(false);
+                    continue;
+                }
+            }
+            if (hearts.length < 8) spawnHeart();
+        }
+
+        function drawHearts() {
+            hearts.forEach(heart => {
+                ctx.save();
+                ctx.translate(heart.x + heart.size/2, heart.y + heart.size/2);
+                ctx.rotate(heart.rot);
+                ctx.font = `${heart.size}px Arial`;
+                ctx.fillText('💖', -heart.size/2, heart.size/2);
+                ctx.restore();
+            });
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+            ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+            updateHearts();
+            drawHearts();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateGameUI() {
+            document.getElementById('gameScore').textContent = score;
+            document.getElementById('gameLives').textContent = lives;
+            document.getElementById('gameTime').textContent = gameTimer;
+        }
+
+        // Canvas init
+        function initCanvas() {
+            gameCanvas = document.getElementById('gameCanvas');
+            ctx = gameCanvas.getContext('2d');
+            function resizeCanvas() {
+                gameCanvas.width = window.innerWidth * 0.9;
+                gameCanvas.height = window.innerHeight * 0.8;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Click/Tap to catch
+            gameCanvas.addEventListener('click', handleCatch);
+            gameCanvas.addEventListener('touchstart', handleCatch);
+        }
+
+        function handleCatch(e) {
+            if (!gameRunning) return;
+            e.preventDefault();
+            const rect = gameCanvas.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+            for (let i = hearts.length - 1; i >= 0; i--) {
+                const heart = hearts[i];
+                const dx = x - (heart.x + heart.size/2);
+                const dy = y - (heart.y + heart.size/2);
+                if (Math.sqrt(dx*dx + dy*dy) < heart.size/2) {
+                    hearts.splice(i, 1);
+                    score += Math.floor(heart.size);
+                    updateGameUI();
+                    // Pop effect
+                    createPop(x, y, heart.size);
+                    break;
+                }
+            }
+        }
+
+        function createPop(x, y, size) {
+            for (let i = 0; i < 6; i++) {
+                const pop = document.createElement('div');
+                pop.textContent = '✨';
+                pop.style.position = 'fixed';
+                pop.style.left = (x + (Math.random()-0.5)*50) + 'px';
+                pop.style.top = (y + (Math.random()-0.5)*50) + 'px';
+                pop.style.fontSize = (10 + Math.random()*10) + 'px';
+                pop.style.pointerEvents = 'none';
+                pop.style.zIndex = '2001';
+                pop.style.animation = 'popAnim 0.5s ease-out forwards';
+                document.body.appendChild(pop);
+                setTimeout(() => pop.remove(), 500);
+            }
+        }
+
+        // Pop animation CSS (inline)
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes popAnim {
+                0% { transform: scale(0) rotate(0deg); opacity: 1; }
+                100% { transform: scale(2) rotate(180deg) translateY(-50px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Init on load
+        window.addEventListener('load', initCanvas);
+    </script>
+</body>
+</html>
